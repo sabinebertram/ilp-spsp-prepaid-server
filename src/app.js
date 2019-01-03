@@ -4,7 +4,7 @@ const BodyParser = require('koa-bodyparser')
 
 const Config = require('./lib/config')
 const Localtunnel = require('./lib/localtunnel')
-const InvoiceController = require('./controllers/invoice')
+const AccountController = require('./controllers/account')
 const PaymentPointerController = require('./controllers/payment-pointer')
 
 class App {
@@ -15,7 +15,7 @@ class App {
     this.localtunnel = deps(Localtunnel)
 
     this.paymentPointer = deps(PaymentPointerController)
-    this.invoices = deps(InvoiceController)
+    this.accounts = deps(AccountController)
   }
 
   async listen () {
@@ -28,7 +28,7 @@ class App {
     }
 
     await this.paymentPointer.init(router)
-    await this.invoices.init(router)
+    await this.accounts.init(router)
 
     app.use(BodyParser())
     app.use(router.routes())

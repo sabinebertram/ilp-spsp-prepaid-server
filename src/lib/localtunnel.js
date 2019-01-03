@@ -1,5 +1,5 @@
 const localtunnel = require('localtunnel')
-const debug = require('debug')('ilp-spsp-invoice:localtunnel')
+const debug = require('debug')('ilp-spsp-account:localtunnel')
 
 const Config = require('../lib/config')
 

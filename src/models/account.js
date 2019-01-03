@@ -6,7 +6,7 @@ const BigNumber = require('bignumber.js')
 
 const Config = require('../lib/config')
 
-class InvoiceModel {
+class AccountModel {
   constructor (deps) {
     this.config = deps(Config)
     this.db = levelup(this.config.dbPath
@@ -18,21 +18,21 @@ class InvoiceModel {
   }
 
   async pay ({ id, amount }) {
-    const invoice = await this.get(id)
+    const account = await this.get(id)
 
     if (!this.balanceCache.get(id)) {
-      this.balanceCache.set(id, invoice.balance)
+      this.balanceCache.set(id, account.balance)
     }
 
     const balance = new BigNumber(this.balanceCache.get(id))
-    const newBalance = BigNumber.min(balance.plus(amount), invoice.amount)
+    const newBalance = BigNumber.min(balance.plus(amount), account.amount)
 
-    if (balance.isEqualTo(invoice.amount)) {
-      throw new Error('This invoice has been paid')
+    if (balance.isEqualTo(account.amount)) {
+      throw new Error('This account has been paid')
     }
 
     let paid = false
-    if (newBalance.isEqualTo(invoice.amount)) {
+    if (newBalance.isEqualTo(account.amount)) {
       paid = true
     }
 
@@ -68,4 +68,4 @@ class InvoiceModel {
   }
 }
 
-module.exports = InvoiceModel
+module.exports = AccountModel

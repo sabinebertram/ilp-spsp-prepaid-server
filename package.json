@@ -1,7 +1,7 @@
 {
-  "name": "ilp-spsp-invoice-server",
+  "name": "ilp-spsp-prepaid-server",
   "version": "1.0.2",
-  "description": "SPSP server that supports invoices",
+  "description": "SPSP server that supports prepaid accounts",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

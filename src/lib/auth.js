@@ -1,5 +1,5 @@
 const Config = require('../lib/config')
-const debug = require('debug')('ilp-spsp-invoice:auth')
+const debug = require('debug')('ilp-spsp-account:auth')
 
 class Auth {
   constructor (deps) {
