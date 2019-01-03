@@ -11,7 +11,7 @@ class PaymentPointerController {
     await this.receiver.listen()
 
     router.get('/:account_id', async ctx => {
-      if (ctx.get('Accept').indexOf('application/spsp+json') === -1) {
+      if (ctx.get('Accept').indexOf('application/spsp4+json') === -1) {
         return ctx.throw(404)
       }
 
@@ -21,23 +21,22 @@ class PaymentPointerController {
       }
 
       const { destinationAccount, sharedSecret } =
-        this.receiver.generateAddressAndSecret()
+        this.receiver.generateAddressAndSecret(ctx.params.token_id)
 
-      const segments = destinationAccount.split('.')
-      const resultAccount = segments.slice(0, -2).join('.') +
-        '.' + ctx.params.account_id +
-        '.' + segments.slice(-2).join('.')
-
-      ctx.set('Content-Type', 'application/spsp+json')
+      ctx.set('Content-Type', 'application/spsp4+json')
       ctx.body = {
-        destination_account: resultAccount,
-        shared_secret: sharedSecret,
+        destination_account: destinationAccount,
+        shared_secret: sharedSecret.toString('base64'),
         balance: {
           current: String(account.balance),
-          maximum: String(account.amount)
+          maximum: String(account.maximum)
+        },
+        pull_balance: {
+          current_amount: String(account.pull_balance),
+          maximum_amount: String(account.pull_maximum)
         },
         receiver_info: {
-          reason: account.reason
+          name: account.name
         }
       }
     })

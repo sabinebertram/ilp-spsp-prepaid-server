@@ -51,13 +51,15 @@ class AccountModel {
     return JSON.parse(await this.db.get(id))
   }
 
-  async create ({ amount, reason, webhook }) {
+  async create ({ maximum, name, webhook }) {
     const id = uuid()
 
     await this.db.put(id, JSON.stringify({
       balance: 0,
-      amount,
-      reason,
+      maximum,
+      pull_balance: 0,
+      pull_maximum: 0,
+      name,
       webhook
     }))
 

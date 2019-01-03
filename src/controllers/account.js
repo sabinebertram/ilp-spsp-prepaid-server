@@ -11,8 +11,8 @@ class AccountController {
   async init (router) {
     router.post('/', this.auth.getMiddleware(), async ctx => {
       debug('creating account')
-      const { amount, reason, webhook } = ctx.request.body
-      const { receiver } = await this.accounts.create({ amount, reason, webhook })
+      const { maximum, name, webhook } = ctx.request.body
+      const { receiver } = await this.accounts.create({ maximum, name, webhook })
       ctx.body = { receiver }
     })
   }
