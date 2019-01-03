@@ -1,14 +1,14 @@
 const AccountModel = require('../models/account')
-const Receiver = require('../lib/receiver')
+const Server = require('../lib/server')
 
 class PaymentPointerController {
   constructor (deps) {
     this.accounts = deps(AccountModel)
-    this.receiver = deps(Receiver)
+    this.server = deps(Server)
   }
 
   async init (router) {
-    await this.receiver.listen()
+    await this.server.listen()
 
     router.get('/:account_id', async ctx => {
       if (ctx.get('Accept').indexOf('application/spsp4+json') === -1) {
@@ -21,7 +21,7 @@ class PaymentPointerController {
       }
 
       const { destinationAccount, sharedSecret } =
-        this.receiver.generateAddressAndSecret(ctx.params.token_id)
+        this.server.generateAddressAndSecret(ctx.params.token_id)
 
       ctx.set('Content-Type', 'application/spsp4+json')
       ctx.body = {

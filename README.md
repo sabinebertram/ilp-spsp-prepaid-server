@@ -1,11 +1,11 @@
-# ILP SPSP Invoice Server
-> SPSP server that supports invoices
+# ILP SPSP Account Server
+> SPSP server that supports accounts
 
 - [Usage](#usage)
 - [Environment Variables](#environment-variables)
 - [API](#api)
-  - [Create an Invoice](#create-an-invoice)
-  - [Query an Invoice](#query-an-invoice)
+  - [Create an Account](#create-an-account)
+  - [Query an Account](#query-an-account)
   - [Webhooks](#webhooks)
 
 ## Usage
@@ -13,11 +13,11 @@
 ```sh
 SPSP_LOCALTUNNEL=true SPSP_LOCALTUNNEL_SUBDOMAIN=mysubdomain npm start
 
-# creates an invoice for 10 XRP; the sender will use a chunked payment
+# creates an account for 10 XRP; the sender will use a chunked payment
 http POST mysubdomain.localtunnel.me amount=10000000 reason="you bought something" \
   Authorization:"Bearer test"
 # {
-#  "receiver": "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d525"
+#  "server": "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d525"
 # }
 
 ilp-spsp query -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d525"
@@ -28,13 +28,13 @@ ilp-spsp query -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d
 #     "current": "0",
 #     "maximum": "10000000"
 #   },
-#   "receiverInfo": {
+#   "serverInfo": {
 #     "reason": "you bought something"
 #   }
 # } 
 
-ilp-spsp invoice -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d525"
-# paying invoice at "$invoices.localtunnel.me/84e17e20-0391-4c00-8af7-b0d91c2aaa07"...
+ilp-spsp account -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d525"
+# paying account at "$accounts.localtunnel.me/84e17e20-0391-4c00-8af7-b0d91c2aaa07"...
 # WARNING: PSK2 Chunked Payments are experimental. Money can be lost if an error occurs mid-payment or if the exchange rate changes dramatically! This should not be used for payments that are significantly larger than the path's Maximum Payment Size.
 # paid!
 
@@ -46,7 +46,7 @@ ilp-spsp query -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d
 #     "current": "10000000",
 #     "maximum": "10000000"
 #   },
-#   "receiverInfo": {
+#   "serverInfo": {
 #     "reason": "you bought something"
 #   }
 # } 
@@ -60,42 +60,42 @@ ilp-spsp query -r "$mysubdomain.localtunnel.me/ef6e2a39-ba3c-a5cc-0849-9730ed56d
 | `SPSP_LOCALTUNNEL` | | If this variable is defined, `SPSP_PORT` will be proxied by localtunnel under `SPSP_LOCALTUNNEL_SUBDOMAIN`. |
 | `SPSP_LOCALTUNNEL_SUBDOMAIN` | | Subdomain to forward `SPSP_PORT` to. Must be defined if you set `SPSP_LOCALTUNNEL` |
 | `SPSP_DB_PATH` | | Path for leveldb database. Uses in-memory database if unspecified. |
-| `SPSP_AUTH_TOKEN` | `test` | Bearer token for creating invoices and receiving webhooks. |
+| `SPSP_AUTH_TOKEN` | `test` | Bearer token for creating accounts and receiving webhooks. |
 | `SPSP_HOST` | localhost or localtunnel | Host to include in payment pointers |
 
 ## API
 
-### Create an Invoice
+### Create an Account
 
 ```http
 POST /
 ```
 
-Create an invoice.
+Create an account.
 
 #### Request
 
-- `amount` - Invoice amount in base ledger units.
-- `reason` - Reason for invoice. Returned in payment pointer response.
-- `webhook` - (Optional) Webhook to `POST` to after the invoice is fully paid. See [Webhooks](#webhooks)
+- `amount` - Account amount in base ledger units.
+- `reason` - Reason for account. Returned in payment pointer response.
+- `webhook` - (Optional) Webhook to `POST` to after the account is fully paid. See [Webhooks](#webhooks)
 
 #### Response
 
-- `receiver` - Payment pointer of the SPSP receiver created for this invoice.
+- `server` - Payment pointer of the SPSP server created for this account.
 
-### Query an Invoice
+### Query an Account
 
 ```http
-GET /:invoice_id
+GET /:account_id
 ```
 
-SPSP receiver endpoint for the invoice with `:invoice_id`. The payment pointer
-returned by [Create an Invoice](#create-an-invoice) resolves to this endpoint.
+SPSP server endpoint for the account with `:account_id`. The payment pointer
+returned by [Create an Account](#create-an-account) resolves to this endpoint.
 
 ### Webhooks
 
-When you [Create an Invoice](#create-an-invoice) and specify a webhook, it will
-call the specified webhook when the invoice is paid. The request is a `POST` with
+When you [Create an Account](#create-an-account) and specify a webhook, it will
+call the specified webhook when the account is paid. The request is a `POST` with
 
 ```http
 Authorization: Bearer <SPSP_AUTH_TOKEN>

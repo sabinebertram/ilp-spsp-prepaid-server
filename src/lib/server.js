@@ -1,23 +1,23 @@
 const PSK2 = require('ilp-protocol-psk2')
-const debug = require('debug')('ilp-spsp-account:receiver')
+const debug = require('debug')('ilp-spsp-account:server')
 
-const Config = require('../lib/config')
-const Webhooks = require('../lib/webhooks')
+const Config = require('./config')
+const Webhooks = require('./webhooks')
 const AccountModel = require('../models/account')
 
-class Receiver {
+class Server {
   constructor (deps) {
     this.config = deps(Config)
     this.accounts = deps(AccountModel)
     this.webhooks = deps(Webhooks)
     this.plugin = this.config.plugin
-    this.receiver = null
+    this.server = null
   }
 
   async listen () {
     await this.plugin.connect()
 
-    this.receiver = await PSK2.createReceiver({
+    this.server = await PSK2.createReceiver({
       plugin: this.plugin,
       paymentHandler: async params => {
         const amount = params.prepare.amount
@@ -40,8 +40,8 @@ class Receiver {
   }
 
   generateAddressAndSecret () {
-    return this.receiver.generateAddressAndSecret()
+    return this.server.generateAddressAndSecret()
   }
 }
 
-module.exports = Receiver
+module.exports = Server
