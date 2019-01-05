@@ -21,9 +21,8 @@ class PaymentPointerController {
       }
 
       const { destinationAccount, sharedSecret } =
-        this.server.generateAddressAndSecret(ctx.params.token_id)
+        this.server.generateAddressAndSecret(ctx.params.account_id)
 
-      ctx.set('Content-Type', 'application/spsp4+json')
       ctx.body = {
         destination_account: destinationAccount,
         shared_secret: sharedSecret.toString('base64'),
@@ -39,6 +38,7 @@ class PaymentPointerController {
           name: account.name
         }
       }
+      ctx.set('Content-Type', 'application/spsp4+json')
     })
   }
 }
