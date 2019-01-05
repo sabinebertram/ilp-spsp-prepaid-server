@@ -30,10 +30,6 @@ class AccountModel {
     const balance = new BigNumber(this.pushBalanceCache.get(id))
     const newBalance = BigNumber.min(balance.plus(amount), account.maximum)
 
-    if (balance.isEqualTo(account.maximum)) {
-      throw new Error('Maximum input has been reached.')
-    }
-
     let full = false
     if (newBalance.isEqualTo(account.maximum)) {
       full = true
@@ -62,7 +58,7 @@ class AccountModel {
     const newBalance = balance.plus(amount)
 
     if (newBalance.isGreaterThan(account.pull_maximum)) {
-      throw new Error('Amount cannot be sent. Not enough funds left.')
+      return 400
     }
 
     await plugin.connect()
@@ -80,7 +76,7 @@ class AccountModel {
 
     console.log('Sent ' + amount + ' to ' + pointer)
 
-    return { status: 'Success' }
+    return 200
   }
 
   async get (id) {

@@ -145,7 +145,7 @@ Pay out of the account corresponding to `account_id`.
 
 #### Response
 
-- `status` - Success
+- 200 OK
 
 <!-- ### Webhooks
 

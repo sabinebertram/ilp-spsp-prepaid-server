@@ -20,8 +20,8 @@ class AccountController {
       debug('sending units')
       const id = ctx.params.account_id
       const { amount, pointer } = ctx.request.body
-      const { status } = await this.accounts.send({ id, amount, pointer })
-      ctx.body = { status }
+      const status = await this.accounts.send({ id, amount, pointer })
+      ctx.status = status
     })
   }
 }
