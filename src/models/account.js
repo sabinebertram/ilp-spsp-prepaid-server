@@ -3,6 +3,8 @@ const levelup = require('levelup')
 const leveldown = require('leveldown')
 const memdown = require('memdown')
 const BigNumber = require('bignumber.js')
+const plugin = require('ilp-plugin')()
+const SPSP = require('ilp-protocol-spsp')
 
 const Config = require('../lib/config')
 
@@ -13,38 +15,72 @@ class AccountModel {
       ? leveldown(this.config.dbPath)
       : memdown())
 
-    this.balanceCache = new Map()
+    this.pushBalanceCache = new Map()
+    this.pullBalanceCache = new Map()
     this.writeQueue = Promise.resolve()
   }
 
   async pay ({ id, amount }) {
     const account = await this.get(id)
 
-    if (!this.balanceCache.get(id)) {
-      this.balanceCache.set(id, account.balance)
+    if (!this.pushBalanceCache.get(id)) {
+      this.pushBalanceCache.set(id, account.balance)
     }
 
-    const balance = new BigNumber(this.balanceCache.get(id))
-    const newBalance = BigNumber.min(balance.plus(amount), account.amount)
+    const balance = new BigNumber(this.pushBalanceCache.get(id))
+    const newBalance = BigNumber.min(balance.plus(amount), account.maximum)
 
-    if (balance.isEqualTo(account.amount)) {
-      throw new Error('This account has been paid')
+    if (balance.isEqualTo(account.maximum)) {
+      throw new Error('Maximum input has been reached.')
     }
 
-    let paid = false
-    if (newBalance.isEqualTo(account.amount)) {
-      paid = true
+    let full = false
+    if (newBalance.isEqualTo(account.maximum)) {
+      full = true
     }
 
     // TODO: debounce instead of writeQueue
-    this.balanceCache.set(id, newBalance.toString())
+    this.pushBalanceCache.set(id, newBalance.toString())
     this.writeQueue = this.writeQueue.then(async () => {
       const loaded = await this.get(id)
       loaded.balance = newBalance.toString()
+      loaded.pull_maximum = newBalance.toString()
       return this.db.put(id, JSON.stringify(loaded))
     })
 
-    return paid
+    return full
+  }
+
+  async send ({ id, amount, pointer }) {
+    const account = await this.get(id)
+
+    if (!this.pullBalanceCache.get(id)) {
+      this.pullBalanceCache.set(id, account.pull_balance)
+    }
+
+    const balance = new BigNumber(this.pullBalanceCache.get(id))
+    const newBalance = balance.plus(amount)
+
+    if (newBalance.isGreaterThan(account.pull_maximum)) {
+      throw new Error('Amount cannot be sent. Not enough funds left.')
+    }
+
+    await plugin.connect()
+    await SPSP.pay(plugin, {
+      receiver: pointer,
+      sourceAmount: amount
+    })
+
+    this.pullBalanceCache.set(id, newBalance.toString())
+    this.writeQueue = this.writeQueue.then(async () => {
+      const loaded = await this.get(id)
+      loaded.pull_balance = newBalance.toString()
+      return this.db.put(id, JSON.stringify(loaded))
+    })
+
+    console.log('Sent ' + amount + ' to ' + pointer)
+
+    return { status: 'Success' }
   }
 
   async get (id) {

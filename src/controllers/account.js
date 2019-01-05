@@ -12,8 +12,16 @@ class AccountController {
     router.post('/', this.auth.getMiddleware(), async ctx => {
       debug('creating account')
       const { maximum, name, webhook } = ctx.request.body
-      const { server } = await this.accounts.create({ maximum, name, webhook })
-      ctx.body = { server }
+      const { receiver } = await this.accounts.create({ maximum, name, webhook })
+      ctx.body = { receiver }
+    })
+
+    router.post('/:account_id', this.auth.getMiddleware(), async ctx => {
+      debug('sending units')
+      const id = ctx.params.account_id
+      const { amount, pointer } = ctx.request.body
+      const { status } = await this.accounts.send({ id, amount, pointer })
+      ctx.body = { status }
     })
   }
 }

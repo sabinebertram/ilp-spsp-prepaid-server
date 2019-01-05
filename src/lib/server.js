@@ -1,5 +1,5 @@
-const PSK2 = require('ilp-protocol-psk2')
-const debug = require('debug')('ilp-spsp-account:server')
+const { createServer } = require('ilp-protocol-stream')
+const crypto = require('crypto')
 
 const Config = require('./config')
 const Webhooks = require('./webhooks')
@@ -15,32 +15,30 @@ class Server {
   }
 
   async listen () {
-    await this.plugin.connect()
-
-    this.server = await PSK2.createReceiver({
+    this.server = await createServer({
       plugin: this.plugin,
-      paymentHandler: async params => {
-        const amount = params.prepare.amount
-        const id = params.prepare.destination.split('.').slice(-3)[0]
+      serverSecret: crypto.randomBytes(32)
+    })
 
-        // this will throw if the account has been paid already
-        debug('got packet. amount=' + amount, 'account=' + id)
-        const paid = await this.accounts.pay({ id, amount })
+    this.server.on('connection', async (connection) => {
+      console.log('server got connection')
 
-        if (paid) {
-          this.webhooks.call({ id })
-            .catch(e => {
-              debug('failed to call webhook. error=', e)
-            })
-        }
+      const id = connection.connectionTag
 
-        return params.acceptSingleChunk()
-      }
+      const account = await this.accounts.get(id)
+
+      connection.on('stream', (stream) => {
+        stream.setReceiveMax(account.maximum - account.balance)
+        stream.on('money', amount => {
+          this.accounts.pay({ id, amount })
+          console.log('Received ' + amount + ' units from ' + connection._sourceAccount)
+        })
+      })
     })
   }
 
-  generateAddressAndSecret () {
-    return this.server.generateAddressAndSecret()
+  generateAddressAndSecret (connectionTag) {
+    return this.server.generateAddressAndSecret(connectionTag)
   }
 }
 
