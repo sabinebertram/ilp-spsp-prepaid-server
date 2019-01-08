@@ -26,7 +26,7 @@ class Webhooks {
         balance: account.balance,
         maximum: account.maximum,
         pulled: account.pull_balance,
-        pointer: account.pointer()
+        pointer: '$' + this.config.host + '/' + id
       })
     })
   }

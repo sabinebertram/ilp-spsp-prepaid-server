@@ -37,7 +37,7 @@ class AccountModel {
 
     // TODO: debounce instead of writeQueue
     this.pushBalanceCache.set(id, newBalance.toString())
-    this.writeQueue = this.writeQueue.then(async () => {
+    this.writeQueue = await this.writeQueue.then(async () => {
       const loaded = await this.get(id)
       loaded.balance = newBalance.toString()
       loaded.pull_maximum = newBalance.toString()
