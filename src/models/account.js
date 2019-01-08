@@ -3,7 +3,7 @@ const levelup = require('levelup')
 const leveldown = require('leveldown')
 const memdown = require('memdown')
 const BigNumber = require('bignumber.js')
-const plugin = require('ilp-plugin')()
+const plugin = require('ilp-plugin')
 const SPSP = require('ilp-protocol-spsp')
 
 const Config = require('../lib/config')
@@ -61,8 +61,7 @@ class AccountModel {
       return 400
     }
 
-    await plugin.connect()
-    await SPSP.pay(plugin, {
+    await SPSP.pay(plugin(), {
       receiver: pointer,
       sourceAmount: amount
     })
