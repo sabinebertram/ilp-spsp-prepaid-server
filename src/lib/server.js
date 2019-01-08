@@ -32,6 +32,10 @@ class Server {
         stream.on('money', amount => {
           this.accounts.pay({ id, amount })
           console.log('Received ' + amount + ' units from ' + connection._sourceAccount)
+          this.webhooks.call({ id })
+            .catch(e => {
+              console.log('Error', e)
+            })
         })
       })
     })

@@ -115,7 +115,7 @@ Create an account.
 
 - `maximum` - Maximum amount that can be paid into this account, in base ledger units.
 - `name` - Name or reference for account. 
-<!-- - `webhook` - (Optional) Webhook to `POST` to after the account is fully paid. See [Webhooks](#webhooks) -->
+- `webhook` - (Optional) Webhook to `POST` to after the account has been funded. See [Webhooks](#webhooks)
 
 #### Response
 
@@ -147,17 +147,17 @@ Pay out of the account corresponding to `account_id`.
 
 - 200 OK
 
-<!-- ### Webhooks
+### Webhooks
 
-When you [Create an Account](#create-an-account) and specify a webhook, it will
-call the specified webhook when the account is paid. The request is a `POST` with
+When an account is funded and a webhook is specified, the webhook will be called. The request is a `POST` with
 
 ```http
 Authorization: Bearer <SPSP_AUTH_TOKEN>
 
 {
   "balance": 1000000,
-  "amount": 1000000,
+  "maximum": 1000000,
+  "pulled": 456,
   "pointer": "$localhost:6000/1b6cf71a-f465-43f2-bd69-92f66defbaf7",
 }
-``` -->
+```

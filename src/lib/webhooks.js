@@ -24,7 +24,8 @@ class Webhooks {
       },
       body: JSON.stringify({
         balance: account.balance,
-        amount: account.amount,
+        maximum: account.maximum,
+        pulled: account.pull_balance,
         pointer: account.pointer()
       })
     })
