@@ -14,20 +14,12 @@ class AccountModel {
     this.db = levelup(this.config.dbPath
       ? leveldown(this.config.dbPath)
       : memdown())
-
-    this.pushBalanceCache = new Map()
-    this.pullBalanceCache = new Map()
-    this.writeQueue = Promise.resolve()
   }
 
   async pay ({ id, amount }) {
     const account = await this.get(id)
 
-    if (!this.pushBalanceCache.get(id)) {
-      this.pushBalanceCache.set(id, account.balance)
-    }
-
-    const balance = new BigNumber(this.pushBalanceCache.get(id))
+    const balance = new BigNumber(account.balance)
     const newBalance = BigNumber.min(balance.plus(amount), account.maximum)
 
     let full = false
@@ -35,14 +27,9 @@ class AccountModel {
       full = true
     }
 
-    // TODO: debounce instead of writeQueue
-    this.pushBalanceCache.set(id, newBalance.toString())
-    this.writeQueue = await this.writeQueue.then(async () => {
-      const loaded = await this.get(id)
-      loaded.balance = newBalance.toString()
-      loaded.pull_maximum = newBalance.toString()
-      return this.db.put(id, JSON.stringify(loaded))
-    })
+    account.balance = newBalance.toString()
+    account.pull_maximum = newBalance.toString()
+    await this.db.put(id, JSON.stringify(account))
 
     return full
   }
@@ -50,11 +37,7 @@ class AccountModel {
   async send ({ id, amount, pointer }) {
     const account = await this.get(id)
 
-    if (!this.pullBalanceCache.get(id)) {
-      this.pullBalanceCache.set(id, account.pull_balance)
-    }
-
-    const balance = new BigNumber(this.pullBalanceCache.get(id))
+    const balance = new BigNumber(account.pull_balance)
     const newBalance = balance.plus(amount)
 
     if (newBalance.isGreaterThan(account.pull_maximum)) {
@@ -66,12 +49,8 @@ class AccountModel {
       sourceAmount: amount
     })
 
-    this.pullBalanceCache.set(id, newBalance.toString())
-    this.writeQueue = this.writeQueue.then(async () => {
-      const loaded = await this.get(id)
-      loaded.pull_balance = newBalance.toString()
-      return this.db.put(id, JSON.stringify(loaded))
-    })
+    account.pull_balance = newBalance.toString()
+    await this.db.put(id, JSON.stringify(account))
 
     console.log('Sent ' + amount + ' to ' + pointer)
 
