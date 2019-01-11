@@ -25,7 +25,7 @@ class Webhooks {
       body: JSON.stringify({
         balance: account.balance,
         maximum: account.maximum,
-        pulled: account.pull_balance,
+        available: account.available,
         pointer: '$' + this.config.host + '/' + id
       })
     })

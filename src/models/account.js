@@ -22,13 +22,16 @@ class AccountModel {
     const balance = new BigNumber(account.balance)
     const newBalance = BigNumber.min(balance.plus(amount), account.maximum)
 
+    const available = new BigNumber(account.available)
+    const newAvailable = available.plus(newBalance.minus(balance))
+
     let full = false
     if (newBalance.isEqualTo(account.maximum)) {
       full = true
     }
 
     account.balance = newBalance.toString()
-    account.pull_maximum = newBalance.toString()
+    account.available = newAvailable.toString()
     await this.db.put(id, JSON.stringify(account))
 
     return full
@@ -37,10 +40,10 @@ class AccountModel {
   async send ({ id, amount, pointer }) {
     const account = await this.get(id)
 
-    const balance = new BigNumber(account.pull_balance)
-    const newBalance = balance.plus(amount)
+    const balance = new BigNumber(account.available)
+    const newBalance = balance.minus(amount)
 
-    if (newBalance.isGreaterThan(account.pull_maximum)) {
+    if (newBalance.isLessThan(0)) {
       return 400
     }
 
@@ -49,7 +52,7 @@ class AccountModel {
       sourceAmount: amount
     })
 
-    account.pull_balance = newBalance.toString()
+    account.available = newBalance.toString()
     await this.db.put(id, JSON.stringify(account))
 
     console.log('Sent ' + amount + ' to ' + pointer)
@@ -67,8 +70,7 @@ class AccountModel {
     await this.db.put(id, JSON.stringify({
       balance: 0,
       maximum,
-      pull_balance: 0,
-      pull_maximum: 0,
+      available: 0,
       name,
       webhook
     }))

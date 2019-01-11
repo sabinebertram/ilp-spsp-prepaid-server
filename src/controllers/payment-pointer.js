@@ -28,11 +28,8 @@ class PaymentPointerController {
         shared_secret: sharedSecret.toString('base64'),
         balance: {
           current: String(account.balance),
-          maximum: String(account.maximum)
-        },
-        pull_balance: {
-          current_amount: String(account.pull_balance),
-          maximum_amount: String(account.pull_maximum)
+          maximum: String(account.maximum),
+          available: String(account.available)
         },
         receiver_info: {
           name: account.name

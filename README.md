@@ -26,13 +26,9 @@ http GET mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff Accept:
 #   "destination_account":       "test.strata-ilsp-3.xrpTestChildren.KvwQ8qEiDsW6MkHhbE1mhXW459EJnqlaad7A5R1Qys0.local.dkhtKBcw02gE26OH25n5uHlvNvjRLC2c4iM-BcYcA3c.81zoVRpXjpJ10mXkvmCR7xvc~f1ce1882-8f72-4cc1-9374-e0cef46e46ff",
 #   "shared_secret": "01+J64b+gwLD0ivhpzam/RnOb/XgzGb+IwGR2FcDUuk="
 #   "balance": {
+#     "available": "0",
 #     "current": "0",
 #     "maximum": "10000000"
-#   },
-    
-#   "pull_balance": {
-#     "current_amount": "0",
-#     "maximum_amount": "0"
 #   },
 #   "receiver_info": {
 #     "name": "Survey1"
@@ -50,13 +46,9 @@ http GET mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff Accept:
 #   "destination_account":       "test.strata-ilsp-3.xrpTestChildren.KvwQ8qEiDsW6MkHhbE1mhXW459EJnqlaad7A5R1Qys0.local.dkhtKBcw02gE26OH25n5uHlvNvjRLC2c4iM-BcYcA3c.81zoVRpXjpJ10mXkvmCR7xvc~f1ce1882-8f72-4cc1-9374-e0cef46e46ff",
 #   "shared_secret": "01+J64b+gwLD0ivhpzam/RnOb/XgzGb+IwGR2FcDUuk="
 #   "balance": {
+#     "available": "1000",
 #     "current": "1000",
 #     "maximum": "10000000"
-#   },
-    
-#   "pull_balance": {
-#     "current_amount": "0",
-#     "maximum_amount": "1000"
 #   },
 #   "receiver_info": {
 #     "name": "Survey1"
@@ -65,23 +57,15 @@ http GET mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff Accept:
 
 http POST mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff amount=100 pointer='$spsp.strata-ilsp-3.com:8084' Authorization:"Bearer test" 
 
-# {
-#     "status": "Success"
-# }
-
 http GET mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff Accept:"application/spsp4+json"
 
 # {
 #   "destination_account":       "test.strata-ilsp-3.xrpTestChildren.KvwQ8qEiDsW6MkHhbE1mhXW459EJnqlaad7A5R1Qys0.local.dkhtKBcw02gE26OH25n5uHlvNvjRLC2c4iM-BcYcA3c.81zoVRpXjpJ10mXkvmCR7xvc~f1ce1882-8f72-4cc1-9374-e0cef46e46ff",
 #   "shared_secret": "01+J64b+gwLD0ivhpzam/RnOb/XgzGb+IwGR2FcDUuk="
 #   "balance": {
+#     "available": "900",
 #     "current": "1000",
 #     "maximum": "10000000"
-#   },
-    
-#   "pull_balance": {
-#     "current_amount": "100",
-#     "maximum_amount": "1000"
 #   },
 #   "receiver_info": {
 #     "name": "Survey1"
@@ -149,15 +133,12 @@ Pay out of the account corresponding to `account_id`.
 
 ### Webhooks
 
-When an account is funded and a webhook is specified, the webhook will be called. The request is a `POST` with
+When an account is funded and a webhook is specified, the webhook will be called. The request is a `POST` containing `Authorization: Bearer <SPSP_AUTH_TOKEN>` and the following values
 
-```http
-Authorization: Bearer <SPSP_AUTH_TOKEN>
+    {
+      "balance": 1000000,
+      "maximum": 1000000,
+      "available": 456000,
+      "pointer": "$mysubdomain.localtunnel.me/f1ce1882-8f72-4cc1-9374-e0cef46e46ff",
+    }
 
-{
-  "balance": 1000000,
-  "maximum": 1000000,
-  "pulled": 456,
-  "pointer": "$localhost:6000/1b6cf71a-f465-43f2-bd69-92f66defbaf7",
-}
-```
