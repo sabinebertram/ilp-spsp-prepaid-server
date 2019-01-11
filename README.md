@@ -114,7 +114,19 @@ GET /:account_id
 SPSP server endpoint for the account with `:account_id`. The payment pointer
 returned by [Create an Account](#create-an-account) resolves to this endpoint.
 
-### Pay to a third party
+#### Fields
+
+| Field | Type | Description |
+|:---|:---|:---|
+| `destination_account` | [ILP Address](../0015-ilp-addresses/0015-ilp-addresses.md) | ILP Address of the receiver's account |
+| `shared_secret` | 32 bytes, [base64 encoded](https://en.wikipedia.org/wiki/Base64) (including padding) | The shared secret to be used by this specific http client in the [STREAM](../0029-stream/0029-stream.md). |
+| `balance`  | Object | Details of this server account's balance.  |
+| `balance.maximum` | Integer String | Maximum amount, denoted in the minimum divisible units of the server's account, which the server will accept. This represents the highest sum that incoming chunks are allowed to reach, not the highest size of an individual chunk (which is determined by path MTU). |
+| `balance.current` | Integer String | Current sum of all incoming chunks. |
+| `balance.available` | Integer String | Current sum of funds that are available to spent. It is increased by incoming chunks and decreased by outgoing chunks. |
+
+
+### Pay a third party
 
 ```http
 POST /:account_id
